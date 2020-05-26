@@ -90,7 +90,7 @@ const getDataForQueues = async (
       const status = query[name] === 'latest' ? statuses : query[name]
 
       let start = 0
-      let end = 10
+      let end = 9
       if (query.start && query.end) {
         const parsedStart = parseInt(query.start)
         const parsedEnd = parseInt(query.end)
