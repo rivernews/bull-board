@@ -10,6 +10,8 @@ export const App = ({ basePath }: { basePath: string }) => {
     state,
     selectedStatuses,
     setSelectedStatuses,
+    pagination,
+    setPagination,
     promoteJob,
     retryJob,
     retryAll,
@@ -38,6 +40,8 @@ export const App = ({ basePath }: { basePath: string }) => {
                 key={queue.name}
                 selectedStatus={selectedStatuses[queue.name]}
                 selectStatus={setSelectedStatuses}
+                pagination={pagination}
+                setPagination={setPagination}
                 promoteJob={promoteJob(queue.name)}
                 retryJob={retryJob(queue.name)}
                 retryAll={retryAll(queue.name)}

@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { STATUSES, Status } from './constants'
-import { AppQueue, AppJob } from '../../@types/app'
+import { AppQueue, AppJob, PaginationParameters } from '../../@types/app'
 import { Jobs } from './Jobs'
 
 type MenuItemProps = {
@@ -15,7 +15,7 @@ const MenuItem = ({ status, count, onClick, selected }: MenuItemProps) => (
   <div
     className={`menu-item ${status} ${selected ? 'selected' : ''} ${
       count === 0 ? 'off' : 'on'
-    }`}
+      }`}
     onClick={onClick}
   >
     {status !== 'latest' && <b className="count">{count}</b>} {status}
@@ -76,6 +76,8 @@ interface QueueProps {
   queue: AppQueue
   selectedStatus: Status
   selectStatus: (statuses: Record<string, Status>) => void
+  pagination: PaginationParameters
+  setPagination: (pagination: PaginationParameters) => void
   cleanAllDelayed: () => Promise<void>
   cleanAllFailed: () => Promise<void>
   cleanAllCompleted: () => Promise<void>
@@ -88,6 +90,43 @@ interface QueueProps {
 const keysOf = <Target extends {}>(target: Target) =>
   Object.keys(target) as (keyof Target)[]
 
+interface PaginatorProps {
+  pagination: PaginationParameters
+  setPagination: (pagination: PaginationParameters) => void
+  currentPageNumber: number
+  totalPages: number
+  totalJobs: number
+}
+
+const Paginator = ({
+  pagination,
+  setPagination,
+  currentPageNumber,
+  totalPages,
+  totalJobs,
+}: PaginatorProps) => {
+  return (<div className="paginator">
+    <button disabled={pagination.start < 10} role="button" onClick={() => {
+      if (pagination.start >= 10) {
+        setPagination({
+          start: pagination.start - 10,
+          end: pagination.end - 10,
+        })
+      }
+    }}>Prev</button>
+    <button disabled={currentPageNumber >= totalPages} role="button" onClick={() => {
+      if (currentPageNumber < totalPages) {
+        setPagination({
+          start: pagination.start + 10,
+          end: pagination.end + 10,
+        })
+      }
+    }}>Next</button>
+    <span>Page {currentPageNumber} of {totalPages} pages.</span>
+    <span>Listing jobs {pagination.start}th-{pagination.end}th, total {totalJobs} jobs.</span>
+  </div>)
+}
+
 export const Queue = ({
   cleanAllDelayed,
   cleanAllFailed,
@@ -98,37 +137,56 @@ export const Queue = ({
   promoteJob,
   selectedStatus,
   selectStatus,
-}: QueueProps) => (
-  <section>
-    <h3>{queue.name}</h3>
-    <div className="menu-list">
-      {keysOf(STATUSES).map(status => (
-        <MenuItem
-          key={`${queue.name}-${status}`}
-          status={status}
-          count={queue.counts[status]}
-          onClick={() => selectStatus({ [queue.name]: status })}
-          selected={selectedStatus === status}
-        />
-      ))}
-    </div>
-    {selectedStatus && (
-      <>
-        <QueueActions
-          retryAll={retryAll}
-          cleanAllDelayed={cleanAllDelayed}
-          cleanAllFailed={cleanAllFailed}
-          cleanAllCompleted={cleanAllCompleted}
-          queue={queue}
-          status={selectedStatus}
-        />
-        <Jobs
-          retryJob={retryJob}
-          promoteJob={promoteJob}
-          queue={queue}
-          status={selectedStatus}
-        />
-      </>
-    )}
-  </section>
-)
+  pagination,
+  setPagination,
+}: QueueProps) => {
+
+  const totalPages = Math.ceil(queue.counts[selectedStatus] / 10)
+  const currentPageNumber = Math.floor(pagination.start / 10) + 1
+
+  return (
+    <section>
+      <h3>{queue.name}</h3>
+      <div className="menu-list">
+        {keysOf(STATUSES).map(status => (
+          <MenuItem
+            key={`${queue.name}-${status}`}
+            status={status}
+            count={queue.counts[status]}
+            onClick={() => selectStatus({ [queue.name]: status })}
+            selected={selectedStatus === status}
+          />
+        ))}
+      </div>
+      {selectedStatus && (
+        <>
+          <QueueActions
+            retryAll={retryAll}
+            cleanAllDelayed={cleanAllDelayed}
+            cleanAllFailed={cleanAllFailed}
+            cleanAllCompleted={cleanAllCompleted}
+            queue={queue}
+            status={selectedStatus}
+          />
+
+          <Paginator
+            pagination={pagination}
+            setPagination={setPagination}
+            currentPageNumber={currentPageNumber}
+            totalPages={totalPages}
+            totalJobs={queue.counts[selectedStatus]}
+          />
+
+          <Jobs
+            retryJob={retryJob}
+            promoteJob={promoteJob}
+            queue={queue}
+            status={selectedStatus}
+            pagination={pagination}
+            setPagination={setPagination}
+          />
+        </>
+      )}
+    </section>
+  )
+}

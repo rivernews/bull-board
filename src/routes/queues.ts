@@ -72,6 +72,9 @@ const getDataForQueues = async (
   req: Request,
 ): Promise<api.GetQueues> => {
   const query = req.query || {}
+
+  console.log('query', query)
+  
   const pairs = Object.entries(bullBoardQueues)
 
   if (pairs.length == 0) {
@@ -85,7 +88,21 @@ const getDataForQueues = async (
     pairs.map(async ([name, { queue }]) => {
       const counts = await queue.getJobCounts(...statuses)
       const status = query[name] === 'latest' ? statuses : query[name]
-      const jobs: (Job | JobMq)[] = await queue.getJobs(status, 0, 10)
+
+      let start = 0
+      let end = 10
+      if (query.start && query.end) {
+        const parsedStart = parseInt(query.start)
+        const parsedEnd = parseInt(query.end)
+        if (parsedStart !== NaN) {
+          start = parsedStart
+        }
+        if (parsedEnd !== NaN) {
+          end = parsedEnd
+        }
+      }
+
+      const jobs: (Job | JobMq)[] = status ? await queue.getJobs(status, start, end) : []
 
       return {
         name,

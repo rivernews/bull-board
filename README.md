@@ -113,6 +113,12 @@ Now, to try it out locally you can run:
 yarn && yarn start:dev
 ```
 
+You can enable hot-reloading upon file change by running the following command in another terminal (if you make changes in frontend, you still need to refresh the browser):
+
+```sh
+npm run build:ui:watch
+```
+
 ### Acknowledgements ❤️
 
 - [Juan](https://github.com/joaomilho) for building the first version of this library

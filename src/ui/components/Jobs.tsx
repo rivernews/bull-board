@@ -1,6 +1,6 @@
 import React from 'react'
 import { Status, FIELDS } from './constants'
-import { AppJob, AppQueue } from '../../@types/app'
+import { AppJob, AppQueue, PaginationParameters } from '../../@types/app'
 import { Job } from './Job'
 
 export const Jobs = ({
@@ -13,6 +13,8 @@ export const Jobs = ({
   promoteJob: (job: AppJob) => () => Promise<void>
   queue: AppQueue
   status: Status
+  pagination: PaginationParameters
+  setPagination: (pagination: PaginationParameters) => void
 }) => {
   if (!jobs.length) {
     return <>No jobs with status {status}</>

@@ -215,6 +215,12 @@ button:active {
   top: 1px;
 }
 
+button:disabled {
+  background-color: whitesmoke;
+  color: gray;
+  cursor: not-allowed;
+}
+
 /* Progress bar */
 
 .progress-wrapper {
@@ -227,4 +233,15 @@ button:active {
   border-right: 2px solid rgba(0, 0, 0, 0.1);
   text-align: right;
   color: #070;
+}
+
+/* Paginator */
+
+.paginator {
+  text-align: center;
+}
+
+.paginator > button,
+.paginator > span {
+  margin: 2px 3px;
 }

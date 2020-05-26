@@ -39,3 +39,8 @@ export interface AppQueue {
   counts: Record<Status, number>
   jobs: AppJob[]
 }
+
+export interface PaginationParameters {
+  start: number
+  end: number
+}

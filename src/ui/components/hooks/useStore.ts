@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import qs from 'querystring'
 import { Status } from '../constants'
 import * as api from '../../../@types/api'
-import { AppQueue, AppJob } from '../../../@types/app'
+import { AppQueue, AppJob, PaginationParameters } from '../../../@types/app'
 
 const interval = 5000
 
@@ -23,6 +23,8 @@ export interface Store {
   cleanAllCompleted: (queueName: string) => () => Promise<void>
   selectedStatuses: SelectedStatuses
   setSelectedStatuses: React.Dispatch<React.SetStateAction<SelectedStatuses>>
+  pagination: PaginationParameters
+  setPagination: React.Dispatch<React.SetStateAction<PaginationParameters>>
 }
 
 export const useStore = (basePath: string): Store => {
@@ -33,6 +35,10 @@ export const useStore = (basePath: string): Store => {
   const [selectedStatuses, setSelectedStatuses] = useState(
     {} as SelectedStatuses,
   )
+  const [pagination, setPagination] = useState<PaginationParameters>({
+    start: 0,
+    end: 9,
+  })
 
   const poll = useRef(undefined as undefined | NodeJS.Timeout)
   const stopPolling = () => {
@@ -47,7 +53,7 @@ export const useStore = (basePath: string): Store => {
     runPolling()
 
     return stopPolling
-  }, [selectedStatuses])
+  }, [selectedStatuses, pagination])
 
   const runPolling = () => {
     update()
@@ -59,7 +65,10 @@ export const useStore = (basePath: string): Store => {
   }
 
   const update = () =>
-    fetch(`${basePath}/queues/?${qs.encode(selectedStatuses)}`)
+    fetch(`${basePath}/queues/?${qs.encode(Object.entries(selectedStatuses).length ? {
+      ...selectedStatuses,
+      ...pagination,
+    } : {})}`)
       .then(res => (res.ok ? res.json() : Promise.reject(res)))
       .then(data => setState({ data, loading: false }))
 
@@ -112,5 +121,7 @@ export const useStore = (basePath: string): Store => {
     cleanAllCompleted,
     selectedStatuses,
     setSelectedStatuses,
+    pagination,
+    setPagination,
   }
 }
