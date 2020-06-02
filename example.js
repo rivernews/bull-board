@@ -15,7 +15,7 @@ const redisOptions = {
 const run = () => {
   setQueues([/* Already defined (bull) queues */]);
   // Or a single bull queue
-  setQueues(/* Already defined bull queue */);
+  // setQueues(/* Already defined bull queue */);
 
   const queues = createQueues(redisOptions)
 
